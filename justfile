@@ -19,6 +19,7 @@ deploy:
     just copy src {{vm_user}}@{{vm_ip}}:~/src
 
 return:
+    just command "mkdir -p \~/out"
     just copy {{vm_user}}@{{vm_ip}}:~/out .
 
 clean:
@@ -27,3 +28,11 @@ clean:
 poc: clean deploy
     just command '\~/.local/bin/uv run /home/{{vm_user}}/src/poc.py'
     just return
+
+posh: clean deploy
+    just command 'chmod +x /home/{{vm_user}}/src/poc.sh'
+    just command '/home/{{vm_user}}/src/poc.sh'
+    just return
+
+shellcode:
+    uv run shellcodes/build.py
