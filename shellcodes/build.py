@@ -5,15 +5,21 @@
 # ]
 # ///
 
+import base64
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Protocol
 
 from rich.console import Console
 
 console = Console()
+
+
+class ShellcodeRepr(Protocol):
+    def __call__(self, name: str, shellcode: bytes) -> str: ...
+
 
 TARGETS: List[str] = ["clock_gettime"]
 CROSS: str = "aarch64-linux-musl-"
@@ -60,15 +66,30 @@ def run_command(command: List[str]) -> CommandResult:
         raise ScriptError(f"Executable not found: {command[0]}")
 
 
+def python_shellcode_repr(name: str, shellcode: bytes) -> str:
+    return f'{name.upper()}_SHELLCODE = bytes.fromhex("{shellcode.hex()}")'
+
+
+def bash_shellcode_repr(name: str, shellcode: bytes) -> str:
+    return f'{name.upper()}_SHELLCODE_B64="{base64.b64encode(shellcode).decode()}"'
+
+
+SHELLCODE_REPRS: List[ShellcodeRepr] = [python_shellcode_repr, bash_shellcode_repr]
+
+
 def build(target: Path) -> None:
     try:
         run_command([f"{CROSS}as", f"{target}.S", "-o", f"{target}.o"])
         run_command([f"{CROSS}objcopy", "-O", "binary", f"{target}.o", f"{target}.bin"])
 
-        result = run_command(["hexdump", "-v", "-e", '1/1 "0x%02x,"', f"{target}.bin"])
-        name = target.name.upper()
-        values = result.stdout.decode().removesuffix(",").replace(",", ", ")
-        info(f"Shellcode:\n\n{SHELLCODE_TEMPLATE.format(name=name, values=values)}\n")
+        result = run_command(["hexdump", "-v", "-e", '1/1 "%02x"', f"{target}.bin"])
+        shellcode = bytes.fromhex(result.stdout.decode())
+        name = target.name
+
+        for shellcode_repr in SHELLCODE_REPRS:
+            info(
+                f"[bold]{shellcode_repr.__qualname__}[/bold]:\n{shellcode_repr(name, shellcode)}"
+            )
 
     finally:
         run_command(["rm", "-f", f"{target}.bin"])
