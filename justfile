@@ -26,7 +26,7 @@ clean:
     just command 'rm -rf \~/src \~/out'
 
 poc: clean deploy
-    just command '\~/.local/bin/uv run /home/{{vm_user}}/src/poc.py'
+    -just command '\~/.local/bin/uv run /home/{{vm_user}}/src/poc.py'
     just return
 
 posh: clean deploy
