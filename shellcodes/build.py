@@ -21,9 +21,10 @@ class ShellcodeRepr(Protocol):
     def __call__(self, name: str, shellcode: bytes) -> str: ...
 
 
-TARGETS: List[str] = ["clock_gettime"]
+TARGETS: List[str] = ["clock_gettime", "any_syscall"]
 CROSS: str = "aarch64-linux-musl-"
 SHELLCODE_TEMPLATE = "{name}_SHELLCODE = bytes([{values}])"
+PYTHON_MAX_SHELLCODE_WIDTH = 64
 
 
 class ScriptError(Exception):
@@ -67,7 +68,16 @@ def run_command(command: List[str]) -> CommandResult:
 
 
 def python_shellcode_repr(name: str, shellcode: bytes) -> str:
-    return f'{name.upper()}_SHELLCODE = bytes.fromhex("{shellcode.hex()}")'
+    hex_data = shellcode.hex()
+
+    chunks = [
+        hex_data[i : i + PYTHON_MAX_SHELLCODE_WIDTH]
+        for i in range(0, len(hex_data), PYTHON_MAX_SHELLCODE_WIDTH)
+    ]
+
+    joined = '"\n    "'.join(chunks)
+
+    return f"{name.upper()}_SHELLCODE = bytes.fromhex(\n" f'    "{joined}"\n' f")"
 
 
 def bash_shellcode_repr(name: str, shellcode: bytes) -> str:
