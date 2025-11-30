@@ -30,7 +30,7 @@ poc: clean deploy
     just return
 
 posh: clean deploy
-    just command 'chmod +x /home/{{vm_user}}/src/poc.sh'
+    just command 'chmod +x /home/{{vm_user}}/src/poc.sh /home/{{vm_user}}/src/lib/*.sh'
     just command '/home/{{vm_user}}/src/poc.sh'
     just return
 
