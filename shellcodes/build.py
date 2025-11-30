@@ -25,6 +25,7 @@ TARGETS: List[str] = ["clock_gettime", "any_syscall"]
 CROSS: str = "aarch64-linux-musl-"
 SHELLCODE_TEMPLATE = "{name}_SHELLCODE = bytes([{values}])"
 PYTHON_MAX_SHELLCODE_WIDTH = 64
+BASH_MAX_SHELLCODE_WIDTH = 64
 
 
 class ScriptError(Exception):
@@ -81,7 +82,16 @@ def python_shellcode_repr(name: str, shellcode: bytes) -> str:
 
 
 def bash_shellcode_repr(name: str, shellcode: bytes) -> str:
-    return f'{name.upper()}_SHELLCODE_B64="{base64.b64encode(shellcode).decode()}"'
+    b64 = base64.b64encode(shellcode).decode()
+
+    chunks = [
+        b64[i : i + BASH_MAX_SHELLCODE_WIDTH]
+        for i in range(0, len(b64), BASH_MAX_SHELLCODE_WIDTH)
+    ]
+
+    joined = "\n".join(chunks)
+
+    return f'{name.upper()}_SHELLCODE_B64="\\\n' f'{joined}\n"'
 
 
 SHELLCODE_REPRS: List[ShellcodeRepr] = [python_shellcode_repr, bash_shellcode_repr]
