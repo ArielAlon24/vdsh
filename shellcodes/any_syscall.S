@@ -14,10 +14,16 @@
  * } syscall_config_mode_t;
  *
  * typedef struct syscall_config {
- *     mode_t mode;
- *     uint64_t number;
- *     uint64_t arguments[6];
- *     uint64_t *result_address;
+ *     uint32_t mode;            // 0x00
+ *     uint32_t _padding;        // 0x04
+ *     uint64_t number;          // 0x08
+ *     uint64_t argument0;       // 0x10
+ *     uint64_t argument1;       // 0x18
+ *     uint64_t argument2;       // 0x20
+ *     uint64_t argument3;       // 0x28
+ *     uint64_t argument4;       // 0x30
+ *     uint64_t argument5;       // 0x38
+ *     uint64_t *result_address; // 0x40
  * } syscall_config_t;
  * ```
  *
