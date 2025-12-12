@@ -1,0 +1,71 @@
+[project]
+name = "vdsh"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["rich>=14.2.0", "typer>=0.20.0"]
+
+[project.scripts]
+vdsh = "vdsh.cli.__main__:main"
+
+[project.optional-dependencies]
+dev = ["mypy>=1.19.0", "pytest>=9.0.1", "ruff>=0.14.8"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["."]
+fix = false
+show-fixes = true
+exclude = [".venv", "__pycache__", "build", "dist"]
+
+[tool.ruff.lint]
+select = [
+    "F",   # Pyflakes (real bugs)
+    "E",
+    "W",   # pycodestyle
+    "C90", # McCabe complexity
+    "I",   # isort
+    "N",   # PEP8 naming
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "A",   # builtins shadowing
+    "COM", # trailing commas
+    "C4",  # comprehensions
+    "DTZ", # datetime tz safety
+    "ISC", # implicit string concat
+    "ICN", # import conventions
+    "PIE", # misc correctness
+    "PT",  # pytest style
+    "RET", # return consistency
+    "SIM", # simplifications
+    "TCH", # type-checking imports
+    "ARG", # unused arguments
+    "PTH", # pathlib preferred
+    "RUF", # Ruff-specific rules
+]
+ignore = [
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D104", # Missing docstring in public package
+    "D105", # Magic method docstrings
+    "D107", # __init__ docstring
+    "E501", # Line length (handled separately)
+]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = ["typer", "typer.*", "rich", "rich.*", "pytest", "pytest.*"]
+ignore_missing_imports = true
