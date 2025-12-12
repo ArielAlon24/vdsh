@@ -5,4 +5,4 @@ check_type:
     mypy vdsh tests
 
 test:
-    pytest tests
+    pytest -v tests
