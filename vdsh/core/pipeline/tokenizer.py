@@ -13,7 +13,7 @@ from vdsh.core.models import Position
 from vdsh.core.models.token import (
     BaseToken,
     EOFToken,
-    IndetifierToken,
+    IdentifierToken,
     Keyword,
     KeywordToken,
     NumberToken,
@@ -45,8 +45,8 @@ STRING_TERMINATOR = '"'
 
 
 class Tokenizer(BaseIterator[BaseToken]):
-    def __init__(self, char_iterator: PeekableIterator[str]) -> None:
-        self.char_iterator = char_iterator
+    def __init__(self, char_iterator: BaseIterator[str]) -> None:
+        self.char_iterator = PeekableIterator(char_iterator)
         self.position = Position(row=1, column=1)
         self._reached_eof = False
 
@@ -123,7 +123,7 @@ class Tokenizer(BaseIterator[BaseToken]):
             if text == kw.value:
                 return KeywordToken(start=start, end=end, kind=kw)
 
-        return IndetifierToken(start=start, end=end, value=text)
+        return IdentifierToken(start=start, end=end, name=text)
 
     def _read_operator(self, candidates: list[str]) -> OperatorToken:
         start = self.position.copy()

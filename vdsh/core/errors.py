@@ -1,17 +1,23 @@
 from dataclasses import dataclass
 
 from vdsh.core.models import Position
+from vdsh.core.models.ast import BaseASTNode
+from vdsh.core.models.token import BaseToken, Operator
 
 
 class VDSHError(Exception):
     pass
 
 
-class CharIteratorIsOverError(VDSHError):
+class IteratorIsOverError(VDSHError):
     pass
 
 
 class TokenizerError(VDSHError):
+    pass
+
+
+class ParserError(VDSHError):
     pass
 
 
@@ -38,3 +44,16 @@ class InvalidNumberError(TokenizerError):
     start: Position
     end: Position
     value: str
+
+
+@dataclass
+class UnclosedParenError(ParserError):
+    opening_token: BaseToken
+    parsed_value: BaseASTNode
+    expected: Operator
+    actual: BaseToken
+
+
+@dataclass
+class UnexpectedTokenError(ParserError):
+    token: BaseToken

@@ -5,15 +5,15 @@ import typer
 from rich.console import Console
 from rich.pretty import pprint
 
-from vdsh.core.errors import TokenizerError
+from vdsh.core.errors import ParserError
 from vdsh.core.iterator import SequenceIterator
-from vdsh.core.pipeline import Tokenizer
+from vdsh.core.pipeline import Parser, Tokenizer
 
-tokenizer_typer = typer.Typer()
+parser_typer = typer.Typer()
 console = Console()
 
 
-@tokenizer_typer.command("tokenize")
+@parser_typer.command("parse")
 def tokenize_command(
     src: Annotated[str, typer.Argument()],
     oneline: Annotated[bool, typer.Option()] = False,
@@ -22,10 +22,10 @@ def tokenize_command(
     data = src if code else Path(src).read_text()
     char_iterator = SequenceIterator(data)
     tokenizer = Tokenizer(char_iterator)
+    parser = Parser(tokenizer)
 
     try:
-        while not tokenizer.is_over():
-            pprint(tokenizer.next(), expand_all=not oneline)
-    except TokenizerError as e:
+        pprint(parser.create(), expand_all=not oneline)
+    except ParserError as e:
         console.print("[bold red]\\[!][/bold red] Error:")
         pprint(e, expand_all=True)

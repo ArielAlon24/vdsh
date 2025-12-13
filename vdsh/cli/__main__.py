@@ -1,6 +1,6 @@
 import typer
 
-from vdsh.cli.commands import misc_typer, tokenizer_typer
+from vdsh.cli.commands import misc_typer, parser_typer, tokenizer_typer
 
 
 def main() -> None:
@@ -8,5 +8,6 @@ def main() -> None:
 
     app.add_typer(misc_typer)
     app.add_typer(tokenizer_typer)
+    app.add_typer(parser_typer)
 
     app()

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from vdsh.core.errors import CharIteratorIsOverError
+from vdsh.core.errors import IteratorIsOverError
 from vdsh.core.iterator.base_iterator import BaseIterator
 
 
@@ -17,7 +17,7 @@ class PeekableIterator[T](BaseIterator[T]):
     def peek(self) -> T:
         if self._peek_state is None:
             if self._iterator.is_over():
-                raise CharIteratorIsOverError("Atempted to peek past iterator length")
+                raise IteratorIsOverError("Atempted to peek past iterator length")
 
             self._peek_state = PeekableIteratorState(self._iterator.next())
 

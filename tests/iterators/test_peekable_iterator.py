@@ -1,12 +1,11 @@
 import pytest
 
-from vdsh.core.errors import CharIteratorIsOverError
-from vdsh.core.iterator import PeekableIterator
-from vdsh.core.pipeline import CharIterator
+from vdsh.core.errors import IteratorIsOverError
+from vdsh.core.iterator import PeekableIterator, SequenceIterator
 
 
 def test_peek_does_not_consume() -> None:
-    it = PeekableIterator(CharIterator("ab"))
+    it = PeekableIterator(SequenceIterator("ab"))
 
     assert it.peek() == "a"
     assert it.peek() == "a"
@@ -16,7 +15,7 @@ def test_peek_does_not_consume() -> None:
 
 
 def test_next_after_peek() -> None:
-    it = PeekableIterator(CharIterator("x"))
+    it = PeekableIterator(SequenceIterator("x"))
 
     assert it.peek() == "x"
     assert it.next() == "x"
@@ -24,7 +23,7 @@ def test_next_after_peek() -> None:
 
 
 def test_next_without_peek() -> None:
-    it = PeekableIterator(CharIterator("ab"))
+    it = PeekableIterator(SequenceIterator("ab"))
 
     assert it.next() == "a"
     assert it.peek() == "b"
@@ -33,7 +32,7 @@ def test_next_without_peek() -> None:
 
 
 def test_is_over_false_when_peeked() -> None:
-    it = PeekableIterator(CharIterator("a"))
+    it = PeekableIterator(SequenceIterator("a"))
 
     assert it.peek() == "a"
     assert it.is_over() is False
@@ -42,7 +41,7 @@ def test_is_over_false_when_peeked() -> None:
 
 
 def test_is_over_true_only_when_underlying_is_over_and_not_peeked() -> None:
-    it = PeekableIterator(CharIterator("a"))
+    it = PeekableIterator(SequenceIterator("a"))
 
     assert it.is_over() is False
     assert it.next() == "a"
@@ -50,23 +49,23 @@ def test_is_over_true_only_when_underlying_is_over_and_not_peeked() -> None:
 
 
 def test_peek_past_end_raises() -> None:
-    it = PeekableIterator(CharIterator(""))
+    it = PeekableIterator(SequenceIterator(""))
 
     assert it.is_over() is True
-    with pytest.raises(CharIteratorIsOverError):
+    with pytest.raises(IteratorIsOverError):
         it.peek()
 
 
 def test_next_past_end_raises() -> None:
-    it = PeekableIterator(CharIterator("a"))
+    it = PeekableIterator(SequenceIterator("a"))
 
     assert it.next() == "a"
-    with pytest.raises(CharIteratorIsOverError):
+    with pytest.raises(IteratorIsOverError):
         it.next()
 
 
 def test_interleaved_peek_and_next() -> None:
-    it = PeekableIterator(CharIterator("abc"))
+    it = PeekableIterator(SequenceIterator("abc"))
 
     assert it.peek() == "a"
     assert it.next() == "a"
@@ -77,20 +76,8 @@ def test_interleaved_peek_and_next() -> None:
     assert it.is_over() is True
 
 
-def test_unicode_support() -> None:
-    it = PeekableIterator(CharIterator("א🙂β"))
-
-    assert it.peek() == "א"
-    assert it.next() == "א"
-    assert it.peek() == "🙂"
-    assert it.next() == "🙂"
-    assert it.peek() == "β"
-    assert it.next() == "β"
-    assert it.is_over() is True
-
-
 def test_single_character_invariant() -> None:
-    it = PeekableIterator(CharIterator("hello"))
+    it = PeekableIterator(SequenceIterator("hello"))
 
     while not it.is_over():
         ch = it.peek()

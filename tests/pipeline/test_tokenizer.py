@@ -5,17 +5,16 @@ import pytest
 
 from vdsh.core.errors import (
     InvalidNumberError,
-    InvalidOperatorError,
     TokenizerError,
     UnexpectedCharacterError,
     UnterminatedStringError,
 )
-from vdsh.core.iterator import PeekableIterator
+from vdsh.core.iterator import SequenceIterator
 from vdsh.core.models.position import Position
 from vdsh.core.models.token import (
     BaseToken,
     EOFToken,
-    IndetifierToken,
+    IdentifierToken,
     Keyword,
     KeywordToken,
     NumberToken,
@@ -23,7 +22,7 @@ from vdsh.core.models.token import (
     OperatorToken,
     StringToken,
 )
-from vdsh.core.pipeline import CharIterator, Tokenizer
+from vdsh.core.pipeline import Tokenizer
 
 
 @dataclass
@@ -106,9 +105,9 @@ HAPPY_CANDIDATES = [
         code="for x if y",
         tokens=[
             KeywordToken(start=Position(1, 1), end=Position(1, 3), kind=Keyword.FOR),
-            IndetifierToken(start=Position(1, 5), end=Position(1, 5), value="x"),
+            IdentifierToken(start=Position(1, 5), end=Position(1, 5), name="x"),
             KeywordToken(start=Position(1, 7), end=Position(1, 8), kind=Keyword.IF),
-            IndetifierToken(start=Position(1, 10), end=Position(1, 10), value="y"),
+            IdentifierToken(start=Position(1, 10), end=Position(1, 10), name="y"),
             EOFToken(start=Position(1, 11), end=Position(1, 11)),
         ],
     ),
@@ -116,11 +115,11 @@ HAPPY_CANDIDATES = [
         name="operators-mixed",
         code="a!=b == c",
         tokens=[
-            IndetifierToken(start=Position(1, 1), end=Position(1, 1), value="a"),
+            IdentifierToken(start=Position(1, 1), end=Position(1, 1), name="a"),
             OperatorToken(start=Position(1, 2), end=Position(1, 3), kind=Operator("!=")),
-            IndetifierToken(start=Position(1, 4), end=Position(1, 4), value="b"),
+            IdentifierToken(start=Position(1, 4), end=Position(1, 4), name="b"),
             OperatorToken(start=Position(1, 6), end=Position(1, 7), kind=Operator("==")),
-            IndetifierToken(start=Position(1, 9), end=Position(1, 9), value="c"),
+            IdentifierToken(start=Position(1, 9), end=Position(1, 9), name="c"),
             EOFToken(start=Position(1, 10), end=Position(1, 10)),
         ],
     ),
@@ -144,7 +143,7 @@ HAPPY_CANDIDATES = [
             OperatorToken(start=Position(1, 6), end=Position(1, 6), kind=Operator("*")),
             StringToken(start=Position(1, 8), end=Position(1, 11), value="hi"),
             OperatorToken(start=Position(1, 13), end=Position(1, 14), kind=Operator(">=")),
-            IndetifierToken(start=Position(1, 16), end=Position(1, 16), value="x"),
+            IdentifierToken(start=Position(1, 16), end=Position(1, 16), name="x"),
             EOFToken(start=Position(1, 17), end=Position(1, 17)),
         ],
     ),
@@ -197,9 +196,8 @@ def test_bad_flow(candidate: BadCandidate) -> None:
 
 
 def _tokenize(code: str) -> list[BaseToken]:
-    char_iterator = CharIterator(code)
-    peekable_char_iterator = PeekableIterator(char_iterator)
-    tokenizer = Tokenizer(peekable_char_iterator)
+    char_iterator = SequenceIterator(code)
+    tokenizer = Tokenizer(char_iterator)
 
     tokens = []
     while not tokenizer.is_over():
