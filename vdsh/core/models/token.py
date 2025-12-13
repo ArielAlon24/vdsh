@@ -4,23 +4,23 @@ from enum import Enum
 from vdsh.core.models.position import Position
 
 
-@dataclass
+@dataclass(frozen=True)
 class BaseToken:
     start: Position
     end: Position
 
 
-@dataclass
+@dataclass(frozen=True)
 class EOFToken(BaseToken):
     pass
 
 
-@dataclass
+@dataclass(frozen=True)
 class NumberToken(BaseToken):
     value: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class StringToken(BaseToken):
     value: str
 
@@ -32,53 +32,55 @@ class Keyword(Enum):
     WHILE = "while"
     RETURN = "return"
     FUNC = "func"
-    TRUE = "true"
-    FALSE = "false"
     STRUCT = "struct"
 
 
-@dataclass
+@dataclass(frozen=True)
 class KeywordToken(BaseToken):
     kind: Keyword
 
 
-@dataclass
-class IndetifierToken(BaseToken):
-    value: str
+@dataclass(frozen=True)
+class IdentifierToken(BaseToken):
+    name: str
 
 
 class Operator(Enum):
-    # Arithmetic
     PLUS = "+"
     MINUS = "-"
     STAR = "*"
     SLASH = "/"
+    POWER = "**"
+    PERCENT = "%"
 
-    # Assignment
     ASSIGN = "="
 
-    # Comparison
     EQUALS = "=="
     NOT_EQUALS = "!="
     LESS = "<"
     LESS_EQUAL = "<="
-    GREATER = ">"
-    GREATER_EQUAL = ">="
+    MORE = ">"
+    MORE_EQUAL = ">="
 
-    # Logical
     AND = "&&"
     OR = "||"
     NOT = "!"
 
-    # Grouping / punctuation (optional, but commonly treated as operators)
-    LPAREN = "("
-    RPAREN = ")"
-    LBRACE = "{"
-    RBRACE = "}"
+    LEFT_PAREN = "("
+    RIGHT_PAREN = ")"
+    LEFT_BRACE = "{"
+    RIGHT_BRACE = "}"
+    LEFT_BRACKET = "["
+    RIGHT_BRACKET = "]"
+
     COMMA = ","
+    COLON = ":"
     SEMICOLON = ";"
+    DOUBLE_COLON = "::"
+
+    ARROW = "->"
 
 
-@dataclass
+@dataclass(frozen=True)
 class OperatorToken(BaseToken):
     kind: Operator
