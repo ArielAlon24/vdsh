@@ -1,0 +1,36 @@
+<atom>              ::= Operator(LEFT_PAREN) <expression> Operator(RIGHT_PAREN)
+                    |   Number
+                    |   Identifier
+
+<power>             ::= <atom>
+                    |   <atom> [Operator(POWER) <factor>]*
+
+<factor>            ::= <power>
+                    |   Operator(MINUS) <factor>
+                    |   Operator(PLUS) <factor>
+
+<term>              ::= <factor>
+                    | <factor> [Operator(STAR) <factor>]*
+                    | <factor> [Operator(SLASH) <factor>]*
+                    | <factor> [Operator(PRECENT) <factor>]*
+
+<expression>        ::= <term>
+                    | <term> [Operator(PLUS) <term>] *
+                    | <term> [Operator(MINUS) <term>] *
+
+<comparison>        ::= <expr>
+                    | <expr> Operator(EQUALS) <expr>
+                    | <expr> Operator(NOT_EQUALS) <expr>
+                    | <expr> Operator(LESS) <expr>
+                    | <expr> Operator(LESS_EQUAL) <expr>
+                    | <expr> Operator(MORE) <expr>
+                    | <expr> Operator(MORE_EQUAL) <expr>
+
+<bool-factor>       ::= <atom>
+                    | Operator(NOT) <comparison>
+
+<bool-term>         ::= <bool-factor>
+                    | <bool-factor> [Operator(AND) <bool-factor>]*
+
+<bool-expression>   ::= <bool-term>
+                    | <bool-term> [Operator(OR) <bool-term>]*
