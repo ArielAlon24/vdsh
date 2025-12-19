@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from vdsh.core.models import Position
 from vdsh.core.models.ast import BaseASTNode
-from vdsh.core.models.token import BaseToken, Operator
+from vdsh.core.models.token import BaseToken, KeywordToken, Operator
 
 
 class VDSHError(Exception):
@@ -57,3 +57,56 @@ class UnclosedParenError(ParserError):
 @dataclass
 class UnexpectedTokenError(ParserError):
     token: BaseToken
+
+
+@dataclass
+class InvalidArgumentDeclarationError(ParserError):
+    expected: Operator
+    actual: BaseToken
+
+
+@dataclass
+class MisingIdentifierInAssignmentError(ParserError):
+    actual: BaseToken
+
+
+@dataclass
+class MissingAssignInAssignmentError(ParserError):
+    identifier_name: str
+    actual: BaseToken
+
+
+@dataclass
+class MissingTypeIdentifierError(ParserError):
+    argument_name: str
+    actual: BaseToken
+
+
+@dataclass
+class MissingSemicolonError(ParserError):
+    actual: BaseToken
+
+
+@dataclass
+class BlockMissingInitialBraceError(ParserError):
+    actual: BaseToken
+
+
+@dataclass
+class MissingAssignmentStatementError(ParserError):
+    identifier: BaseToken
+
+
+@dataclass
+class MissingIdentifierInFuncDeclerationError(ParserError):
+    actual: BaseToken
+
+
+@dataclass
+class MissingRightParenInFuncDeclerationError(ParserError):
+    actual: BaseToken
+
+
+@dataclass
+class MissingLeftParenInFuncDeclerationError(ParserError):
+    actual: BaseToken

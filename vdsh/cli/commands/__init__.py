@@ -1,5 +1,7 @@
-from vdsh.cli.commands.misc import misc_typer
-from vdsh.cli.commands.parser import parser_typer
-from vdsh.cli.commands.tokenizer import tokenizer_typer
+from vdsh.cli.commands.build import build_app
+from vdsh.cli.commands.misc import misc_app
+from vdsh.cli.commands.parse import parse_app
+from vdsh.cli.commands.run import run_app
+from vdsh.cli.commands.tokenize import tokenize_app
 
-__all__ = ["misc_typer", "parser_typer", "tokenizer_typer"]
+__all__ = ["build_app", "misc_app", "parse_app", "run_app", "tokenize_app"]

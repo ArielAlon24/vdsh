@@ -1,12 +1,12 @@
 import typer
-from rich.console import Console
 
 from vdsh.__version__ import __VERSION__
+from vdsh.cli.logger import Logger
 
-console = Console()
-misc_typer = typer.Typer()
+misc_app = typer.Typer()
 
 
-@misc_typer.command("version")
+@misc_app.command("version")
 def version_command() -> None:
-    console.print(f"[blue]VDSH[/blue] Version: [bold yellow]{__VERSION__}[/bold yellow]")
+    logger = Logger()
+    logger.print(f"[blue]VDSH[/blue] Version: [bold yellow]{__VERSION__}[/bold yellow]")

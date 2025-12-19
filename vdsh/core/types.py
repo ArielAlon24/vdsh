@@ -1,15 +1,19 @@
 from typing import Protocol
 
 
-class Creator[T](Protocol):
+class BaseCreator[T](Protocol):
     def create(self) -> T: ...
 
 
-class Transformer[I, O](Protocol):
+class BaseTransformer[I, O](Protocol):
     def transform(self, data: I) -> O: ...
 
 
-class StaticCreator[T](Creator[T]):
+class BaseValidator[T](Protocol):
+    def validate(self, data: T) -> None: ...
+
+
+class StaticCreator[T](BaseCreator[T]):
     def __init__(self, value: T) -> None:
         self.value = value
 
@@ -17,7 +21,7 @@ class StaticCreator[T](Creator[T]):
         return self.value
 
 
-class StaticTransformer[O](Transformer[None, O]):
+class StaticTransformer[O](BaseTransformer[None, O]):
     def __init__(self, value: O) -> None:
         self.value = value
 

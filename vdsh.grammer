@@ -34,3 +34,20 @@
 
 <bool-expression>   ::= <bool-term>
                     | <bool-term> [Operator(OR) <bool-term>]*
+
+<assignment>        ::= Identifier Operator(ASSIGN) <statement>
+
+<block>             ::= Operator(LEFT_CURLY) [<statement>]* Opeartor(RIGHT_CURLY)
+
+<arguments>         ::= Identifier Operator(COLON) Identifier [Operator(COMMAN) Identifier Operator(COLON) Identifier]*
+
+<let-statement>     ::= Keyword(LET) <assignemnt>
+
+<func-decleration>  ::= Identifier Operator(RIGHT_PAREN) <arguments> Operator(LEFT_PAREN) <block>
+
+<func-statement>    ::= Keyword(FUNC) <func-decleration>
+
+<statement>         ::= <let-statement> Operator(SEMI_COLON)
+                    | <func-statement> Operator(SEMI_COLON)
+                    | <bool-expression> Operator(SEMI_COLON)
+

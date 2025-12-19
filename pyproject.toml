@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = ["rich>=14.2.0", "typer>=0.20.0"]
 
 [project.scripts]
-vdsh = "vdsh.cli.__main__:main"
+vdsh = "vdsh.cli.__main__:app"
 
 [project.optional-dependencies]
 dev = ["mypy>=1.19.0", "pytest>=9.0.1", "ruff>=0.14.8"]

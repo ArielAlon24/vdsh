@@ -28,6 +28,7 @@ class StringToken(BaseToken):
 class Keyword(Enum):
     FOR = "for"
     IF = "if"
+    LET = "let"
     ELSE = "else"
     WHILE = "while"
     RETURN = "return"

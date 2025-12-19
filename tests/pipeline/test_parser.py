@@ -50,8 +50,8 @@ HAPPY_CANDIDATES = [
             EOFToken(Position(1, 6), Position(1, 6)),
         ],
         ast=BinaryOperationNode(
-            left=NumberLiteralNode(value=1.0),
-            right=NumberLiteralNode(value=2.0),
+            left=NumberLiteralNode(number=1.0),
+            right=NumberLiteralNode(number=2.0),
             operator=Operator.PLUS,
         ),
     ),
@@ -67,9 +67,9 @@ HAPPY_CANDIDATES = [
         ast=BinaryOperationNode(
             left=UnaryOperationNode(
                 operator=Operator.MINUS,
-                value=NumberLiteralNode(value=5.0),
+                value=NumberLiteralNode(number=5.0),
             ),
-            right=NumberLiteralNode(value=3.0),
+            right=NumberLiteralNode(number=3.0),
             operator=Operator.STAR,
         ),
     ),
@@ -83,7 +83,7 @@ HAPPY_CANDIDATES = [
         ],
         ast=BinaryOperationNode(
             left=IdentifierNode(name="x"),
-            right=NumberLiteralNode(value=10.0),
+            right=NumberLiteralNode(number=10.0),
             operator=Operator.LESS_EQUAL,
         ),
     ),
@@ -99,8 +99,8 @@ HAPPY_CANDIDATES = [
         ],
         ast=BinaryOperationNode(
             left=BinaryOperationNode(
-                left=NumberLiteralNode(value=1.0),
-                right=NumberLiteralNode(value=2.0),
+                left=NumberLiteralNode(number=1.0),
+                right=NumberLiteralNode(number=2.0),
                 operator=Operator.NOT_EQUALS,
             ),
             right=IdentifierNode(name="flag"),

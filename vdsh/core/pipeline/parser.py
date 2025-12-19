@@ -1,13 +1,33 @@
 from collections.abc import Callable
 from typing import TypeGuard
 
-from vdsh.core.errors import ParserError, UnclosedParenError, UnexpectedTokenError
+from vdsh.core.errors import (
+    BlockMissingInitialBraceError,
+    InvalidArgumentDeclarationError,
+    MisingIdentifierInAssignmentError,
+    MissingAssignInAssignmentError,
+    MissingIdentifierInFuncDeclerationError,
+    MissingLeftParenInFuncDeclerationError,
+    MissingRightParenInFuncDeclerationError,
+    MissingSemicolonError,
+    MissingTypeIdentifierError,
+    ParserError,
+    UnclosedParenError,
+    UnexpectedTokenError,
+)
 from vdsh.core.iterator import PeekableIterator
 from vdsh.core.iterator.base_iterator import BaseIterator
 from vdsh.core.models.ast import (
+    ArgumentNode,
+    ArgumentsNode,
+    AssignmentNode,
     BaseASTNode,
     BinaryOperationNode,
+    BlockNode,
+    FuncDeclerationNode,
+    FuncStatementNode,
     IdentifierNode,
+    LetStatementNode,
     NumberLiteralNode,
     UnaryOperationNode,
 )
@@ -21,9 +41,9 @@ from vdsh.core.models.token import (
     Operator,
     OperatorToken,
 )
-from vdsh.core.types import Creator
+from vdsh.core.types import BaseCreator
 
-type ParserPredicate = Callable[[BaseToken], bool]
+type ParserPredicate[T] = Callable[[BaseToken], TypeGuard[T]]
 type ASTNodeParser = Callable[[], BaseASTNode]
 
 
@@ -64,18 +84,18 @@ def create_operator_predicate(operator: Operator) -> ParserPredicate:
     return predicate
 
 
-class Parser(Creator[BaseASTNode]):
+class Parser(BaseCreator[BaseASTNode]):
     def __init__(self, token_iterator: BaseIterator[BaseToken]) -> None:
         self.token_iterator = PeekableIterator(token_iterator)
         self._reached_eof = False
 
     def create(self) -> BaseASTNode:
-        return self._parse_bool_expression()
+        return self._parse_statement()
 
     def _consume(self) -> BaseToken:
         return self.token_iterator.next()
 
-    def _expect(self, predicate: ParserPredicate, error: ParserError) -> BaseToken:
+    def _expect[T](self, predicate: ParserPredicate[T], error: ParserError) -> T:
         next_token = self.token_iterator.peek()
         if not predicate(next_token):
             raise error
@@ -97,7 +117,8 @@ class Parser(Creator[BaseASTNode]):
         while is_any_operator(next_token, operators=operators):
             self._consume()
             right = right_parser()
-            left = BinaryOperationNode(left=left, right=right, operator=next_token.kind)
+
+            left = BinaryOperationNode(left=left, right=right, operator=next_token)
 
             if not repeated:
                 break
@@ -117,7 +138,7 @@ class Parser(Creator[BaseASTNode]):
 
             return UnaryOperationNode(
                 value=self._parse_unary_operation(parser, operators=operators),
-                operator=next_token.kind,
+                operator=next_token,
             )
 
         return parser()
@@ -140,10 +161,10 @@ class Parser(Creator[BaseASTNode]):
             return expression
 
         if is_number(next_token):
-            return NumberLiteralNode(value=next_token.value)
+            return NumberLiteralNode(number=next_token)
 
         if is_identifier(next_token):
-            return IdentifierNode(name=next_token.name)
+            return IdentifierNode(identifier=next_token)
 
         raise UnexpectedTokenError(token=next_token)
 
@@ -208,3 +229,111 @@ class Parser(Creator[BaseASTNode]):
             right_parser=self._parse_bool_expression,
             operators=[Operator.OR],
         )
+
+    def _parse_statement(self) -> BaseASTNode:
+        next_token = self.token_iterator.peek()
+
+        if is_keyword(next_token, keyword=Keyword.LET):
+            self._consume()
+            assignment = self._parse_assignment()
+            self._expect(
+                create_operator_predicate(Operator.SEMICOLON),
+                error=MissingSemicolonError(actual=self.token_iterator.peek()),
+            )
+            return LetStatementNode(let=next_token, assignment=assignment)
+
+        if is_keyword(next_token, keyword=Keyword.FUNC):
+            self._consume()
+            func_decleration = self._parse_func_decleration()
+            return FuncStatementNode(func=next_token, decelration=func_decleration)
+
+        return self._parse_bool_expression()
+
+    def _parse_assignment(self) -> AssignmentNode:
+        identifier = self._expect(
+            is_identifier,
+            error=MisingIdentifierInAssignmentError(actual=self.token_iterator.peek()),
+        )
+
+        self._expect(
+            create_operator_predicate(Operator.ASSIGN),
+            error=MissingAssignInAssignmentError(
+                identifier_name=identifier.name,
+                actual=self.token_iterator.peek(),
+            ),
+        )
+
+        value = self._parse_statement()
+
+        return AssignmentNode(identifier=identifier, value=value)
+
+    def _parse_argument(self) -> ArgumentNode | None:
+        identifier_token = self.token_iterator.peek()
+
+        if not is_identifier(identifier_token):
+            return None
+        self._consume()
+
+        self._expect(
+            create_operator_predicate(Operator.COLON),
+            error=InvalidArgumentDeclarationError(
+                expected=Operator.COLON,
+                actual=self.token_iterator.peek(),
+            ),
+        )
+
+        type_token = self.token_iterator.peek()
+        if not is_identifier(type_token):
+            raise MissingTypeIdentifierError(
+                argument_name=identifier_token.name,
+                actual=type_token,
+            )
+        self._consume()
+
+        return ArgumentNode(identifier=identifier_token, type_identifier=type_token)
+
+    def _parse_arguments(self) -> ArgumentsNode:
+        arguments = []
+
+        argument = self._parse_argument()
+        while argument is not None:
+            arguments.append(argument)
+
+            if not is_operator(self.token_iterator.peek(), Operator.COMMA):
+                break
+            self._consume()
+
+            argument = self._parse_argument()
+
+        return ArgumentsNode(arguments=arguments)
+
+    def _parse_block(self) -> BlockNode:
+        self._expect(
+            create_operator_predicate(Operator.LEFT_BRACE),
+            error=BlockMissingInitialBraceError(actual=self.token_iterator.peek()),
+        )
+        statements = []
+
+        while not is_operator(self.token_iterator.peek(), operator=Operator.RIGHT_BRACE):
+            statements.append(self._parse_statement())
+
+        return BlockNode(statements=statements)
+
+    def _parse_func_decleration(self) -> FuncDeclerationNode:
+        identifier = self._expect(
+            is_identifier,
+            error=MissingIdentifierInFuncDeclerationError(actual=self.token_iterator.peek()),
+        )
+
+        self._expect(
+            predicate=create_operator_predicate(Operator.LEFT_PAREN),
+            error=MissingLeftParenInFuncDeclerationError(actual=self.token_iterator.peek()),
+        )
+        arguments = self._parse_arguments()
+        self._expect(
+            predicate=create_operator_predicate(Operator.RIGHT_PAREN),
+            error=MissingRightParenInFuncDeclerationError(actual=self.token_iterator.peek()),
+        )
+        block = self._parse_block()
+
+        return FuncDeclerationNode(identifier=identifier, arguments=arguments, block=block)

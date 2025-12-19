@@ -1,0 +1,33 @@
+import std;
+
+const URL = "www.google.com"
+
+struct Person {
+    age: Number;
+    name: String;
+
+    fn new(self, age: Number, name: String) -> Person {
+        self.age = age;
+        self.name = name;
+    }
+
+    fn say_hi(self) -> None {
+        std::print("Hi! I'm {}", self.name);
+    }
+}
+
+fn add(first: Number, second: Number) -> Number {
+    return first + second;
+}
+
+fn main() -> Number {
+    let first = 1;
+    let second = 2;
+
+    std::print("3 + 4 = {}", add(first, second));
+
+    someone = Person::new(age=25, name="John");
+    someone.say_hi();
+
+    return 0;
+}

@@ -1,6 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from vdsh.core.models.token import Operator
+from vdsh.core.models.token import (
+    IdentifierToken,
+    KeywordToken,
+    NumberToken,
+    OperatorToken,
+    StringToken,
+)
+
+type StatementNode = LetStatementNode
 
 
 @dataclass(frozen=True)
@@ -9,33 +17,69 @@ class BaseASTNode:
 
 
 @dataclass(frozen=True)
-class BaseExpressionNode(BaseASTNode):
-    pass
+class IdentifierNode(BaseASTNode):
+    identifier: IdentifierToken
 
 
 @dataclass(frozen=True)
-class IdentifierNode(BaseExpressionNode):
-    name: str
+class NumberLiteralNode(BaseASTNode):
+    number: NumberToken
 
 
 @dataclass(frozen=True)
-class NumberLiteralNode(BaseExpressionNode):
-    value: float
+class StringLiteralNode(BaseASTNode):
+    string: StringToken
 
 
 @dataclass(frozen=True)
-class StringLiteralNode(BaseExpressionNode):
-    value: str
-
-
-@dataclass(frozen=True)
-class UnaryOperationNode(BaseExpressionNode):
+class UnaryOperationNode(BaseASTNode):
     value: BaseASTNode
-    operator: Operator
+    operator: OperatorToken
 
 
 @dataclass(frozen=True)
-class BinaryOperationNode(BaseExpressionNode):
+class BinaryOperationNode(BaseASTNode):
     left: BaseASTNode
     right: BaseASTNode
-    operator: Operator
+    operator: OperatorToken
+
+
+@dataclass(frozen=True)
+class ArgumentNode(BaseASTNode):
+    identifier: IdentifierToken
+    type_identifier: IdentifierToken
+
+
+@dataclass(frozen=True)
+class ArgumentsNode(BaseASTNode):
+    arguments: list[ArgumentNode] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class BlockNode(BaseASTNode):
+    statements: list[StatementNode]
+
+
+@dataclass(frozen=True)
+class AssignmentNode(BaseASTNode):
+    identifier: IdentifierToken
+    value: BaseASTNode
+
+
+@dataclass(frozen=True)
+class LetStatementNode(BaseASTNode):
+    let: KeywordToken
+    assignment: AssignmentNode
+
+
+@dataclass(frozen=True)
+class FuncDeclerationNode(BaseASTNode):
+    identifier: IdentifierToken
+    arguments: ArgumentsNode
+    block: BlockNode
+
+
+@dataclass(frozen=True)
+class FuncStatementNode(BaseASTNode):
+    func: KeywordToken
+    decelration: FuncDeclerationNode
